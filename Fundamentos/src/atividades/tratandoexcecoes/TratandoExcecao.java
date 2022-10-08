@@ -1,4 +1,4 @@
-package fundamentos.atividades;
+package fundamentos.atividades.tratandoexcecoes;
 
 public class TratandoExcecao
 {
