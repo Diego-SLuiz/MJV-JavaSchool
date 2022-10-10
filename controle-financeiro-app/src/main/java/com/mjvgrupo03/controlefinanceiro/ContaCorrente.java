@@ -44,7 +44,7 @@ public class ContaCorrente
         return contaCancelada;
     }
 
-    public boolean sacar(Double valor) throws SaldoInvalidoException
+    public void sacar(Double valor) throws SaldoInvalidoException
     {
         // Validar se o saldo é suficiente e exibir erro
         if (valor > this.saldoDisponivel)
@@ -61,11 +61,9 @@ public class ContaCorrente
         LocalDate dataExtrato = LocalDate.now();
         Extrato extratoGerado = new Extrato(dataExtrato, "Saque", valor);
         this.listaExtratos.add(extratoGerado);
-
-        return true;
     }
 
-    public boolean depositar(Double valor) throws SaldoInvalidoException
+    public void depositar(Double valor) throws SaldoInvalidoException
     {
         // Validar o valor de depósito e exibir erro
         if (valor <= 0)
@@ -80,11 +78,9 @@ public class ContaCorrente
         LocalDate dataExtrato = LocalDate.now();
         Extrato extratoGerado = new Extrato(dataExtrato, "Deposito", valor);
         this.listaExtratos.add(extratoGerado);
-
-        return true;
     }
 
-    public boolean transferir(Double valor, ContaCorrente destinatario) throws SaldoInvalidoException, ContaInvalidaException
+    public void transferir(Double valor, ContaCorrente destinatario) throws SaldoInvalidoException, ContaInvalidaException
     {
         // Validar se a transferência é válida e exibir erro
         if (valor <= 0)
@@ -106,11 +102,9 @@ public class ContaCorrente
         LocalDate dataExtrato = LocalDate.now();
         Extrato extratoGerado = new Extrato(dataExtrato, "Transferencia", valor);
         this.listaExtratos.add(extratoGerado);
-
-        return true;
     }
 
-    public boolean cancelarConta(String justificativa) throws JustificativaInvalidaException
+    public void cancelarConta(String justificativa) throws JustificativaInvalidaException
     {
         // Verificar a justificativa e exibir erro
         if (justificativa.isBlank())
@@ -121,11 +115,9 @@ public class ContaCorrente
         System.out.println("Nome: " + this.nomeCliente);
         System.out.println("Justificativa: " + justificativa + "\n");
         this.contaCancelada = true;
-
-        return true;
     }
 
-    public boolean consultarExtrato(LocalDate dataInicial, LocalDate dataFinal) throws DataInvalidaException
+    public void consultarExtrato(LocalDate dataInicial, LocalDate dataFinal) throws DataInvalidaException
     {
         // Verificar se a data inicial é posterior a final e exibir erro
         if (dataInicial.isAfter(dataFinal))
@@ -139,7 +131,5 @@ public class ContaCorrente
         for (Extrato x: this.listaExtratos)
             if ((x.data.isAfter(dataInicial) || x.data.isEqual(dataInicial)) && x.data.isBefore(dataFinal))
                 System.out.println(x);
-
-        return true;
     }
 }
