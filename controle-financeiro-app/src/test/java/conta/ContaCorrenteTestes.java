@@ -7,6 +7,7 @@ import com.mjvgrupo03.controlefinanceiro.exception.SaldoInvalidoException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Assertions;
 
 import java.time.LocalDate;
@@ -63,7 +64,7 @@ public class TestandoContaCorrente
 
     @DisplayName("Testando o metodo transferencia")
     @Test
-    public void testandoMetodoTransferencia() throws SaldoInvalidoException, ContaInvalidaException
+    public void testandoMetodoTransferencia() throws SaldoInvalidoException, ContaInvalidaException, DataInvalidaException
     {
         contaTeste.depositar(1000.0);
         contaTeste.transferir(900.0, contaSecundaria);
@@ -78,6 +79,11 @@ public class TestandoContaCorrente
         resultado = contaSecundaria.getSaldoDisponivel();
         Assertions.assertEquals(expectativa, resultado);
 
+        // Consultar o extrato da conta secundaria
+        LocalDate dataInicial = LocalDate.now();
+        LocalDate dataFinal = dataInicial.plusMonths(1);
+        contaSecundaria.consultarExtrato(dataInicial, dataFinal);
+
         // Validar que não é possível transferir para uma conta nula
         Assertions.assertThrows(ContaInvalidaException.class, () -> contaTeste.transferir(100.0, contaNula));
 
@@ -85,7 +91,7 @@ public class TestandoContaCorrente
         Assertions.assertThrows(SaldoInvalidoException.class, () -> contaTeste.transferir(0.0, contaSecundaria));
 
         // Validar que não é possível transferir um valor maior que o saldo disponível
-        Assertions.assertThrows(SaldoInvalidoException.class, () -> contaTeste.transferir(0.0, contaSecundaria));
+        Assertions.assertThrows(SaldoInvalidoException.class, () -> contaTeste.transferir(10000.0, contaSecundaria));
     }
 
     @DisplayName("Testando o metodo cancelarConta")
@@ -100,12 +106,12 @@ public class TestandoContaCorrente
         Assertions.assertEquals(expectativa, resultado);
 
         // Validar que não é possível cancelar uma conta sem uma justificativa
-        Assertions.assertThrows(JustificativaInvalidaException.class, () -> {contaTeste.cancelarConta("");});
+        Assertions.assertThrows(JustificativaInvalidaException.class, () -> contaTeste.cancelarConta(""));
     }
 
     @DisplayName("Testando o metodo consultarExtrato")
     @Test
-    public void testandoMetodoConsultarExtrato() throws SaldoInvalidoException
+    public void testandoMetodoConsultarExtrato() throws SaldoInvalidoException, DataInvalidaException
     {
         contaTeste.depositar(1000.0);
         contaTeste.sacar(500.0);
@@ -121,5 +127,10 @@ public class TestandoContaCorrente
         LocalDate dataInicial = LocalDate.now();
         LocalDate dataFinal = dataInicial.minusMonths(1);
         Assertions.assertThrows(DataInvalidaException.class, () -> contaTeste.consultarExtrato(dataInicial, dataFinal));
+
+        // Consultando extratos
+        LocalDate testeExtratoInicial = dataInicial.plusMonths(1);
+        LocalDate testeExtratoFinal = dataInicial.plusMonths(1);
+        contaTeste.consultarExtrato(testeExtratoInicial, testeExtratoFinal);
     }
 }
