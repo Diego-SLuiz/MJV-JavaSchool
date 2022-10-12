@@ -6,7 +6,9 @@ public enum TipoOperacao
     DEBITO('D'),
     TRANSFERENCIA('T');
 
-    final char sigla;
+    private final char sigla;
+
+    public char getSigla() { return sigla; }
 
     TipoOperacao(char sigla)
     {

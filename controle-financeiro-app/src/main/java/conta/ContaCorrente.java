@@ -39,14 +39,14 @@ public class ContaCorrente
 
     public ArrayList<Operacao> getHistoricoOperacoes() { return this.historicoOperacoes; }
 
-    private static void validarConta(ContaCorrente conta) throws ContaInvalidaException
+    private static void validarConta(ContaCorrente conta)
     {
         // Validar se uma ContaCorrente não é nula e não está cancelada
         if (conta == null || conta.contaCancelada)
             throw new ContaInvalidaException("Uma ContaCorrente nao nula e nao cancelada e necessaria");
     }
 
-    private static void validarConta(ContaCorrente primeiraConta, ContaCorrente segundaConta) throws ContaInvalidaException
+    private static void validarConta(ContaCorrente primeiraConta, ContaCorrente segundaConta)
     {
         ContaCorrente.validarConta(primeiraConta);
         ContaCorrente.validarConta(segundaConta);
@@ -56,14 +56,14 @@ public class ContaCorrente
             throw new ContaInvalidaException("As contas precisam ser diferentes");
     }
 
-    private static void validarValor(Double valor) throws SaldoInvalidoException
+    private static void validarValor(Double valor)
     {
         // Validar se é um valor não nulo e maior que zero
         if (valor == null || valor <= 0)
             throw new SaldoInvalidoException("Um Double nao nulo e maior que zero e necessario");
     }
 
-    private static void validarSaldo(ContaCorrente conta, Double valor) throws SaldoInvalidoException, ContaInvalidaException
+    private static void validarSaldo(ContaCorrente conta, Double valor)
     {
         ContaCorrente.validarConta(conta);
         ContaCorrente.validarValor(valor);
@@ -81,7 +81,7 @@ public class ContaCorrente
         this.historicoOperacoes.add(operacao);
     }
 
-    public void sacar(Double valor) throws SaldoInvalidoException, ContaInvalidaException
+    public void sacar(Double valor)
     {
         // Validação dos dados
         ContaCorrente.validarConta(this);
@@ -98,7 +98,7 @@ public class ContaCorrente
         this.adicionarHistorico(TipoOperacao.DEBITO, "Retirando valor da conta", valor);
     }
 
-    public void depositar(Double valor) throws SaldoInvalidoException, ContaInvalidaException
+    public void depositar(Double valor)
     {
         // Validação dos dados
         ContaCorrente.validarConta(this);
@@ -114,7 +114,7 @@ public class ContaCorrente
         this.adicionarHistorico(TipoOperacao.CREDITO, "Depositando valor na conta", valor);
     }
 
-    public void transferir(Double valor, ContaCorrente destinatario) throws SaldoInvalidoException, ContaInvalidaException
+    public void transferir(Double valor, ContaCorrente destinatario)
     {
         // Validação dos dados
         ContaCorrente.validarConta(this, destinatario);
@@ -131,12 +131,11 @@ public class ContaCorrente
         destinatario.saldoDisponivel += valor;
 
         // Adicionar operação para o histórico de operações
-        this.adicionarHistorico(TipoOperacao.TRANSFERENCIA, "Transferindo saldo para" + destinatario.cliente.getNome(), valor);
-        destinatario.adicionarHistorico(TipoOperacao.TRANSFERENCIA, "Recebendo saldo de" + this.cliente.getNome(), valor);
-
+        this.adicionarHistorico(TipoOperacao.TRANSFERENCIA, "Transferindo saldo para " + destinatario.cliente.getNome(), valor);
+        destinatario.adicionarHistorico(TipoOperacao.TRANSFERENCIA, "Recebendo saldo de " + this.cliente.getNome(), valor);
     }
 
-    public void cancelarConta(String justificativa) throws JustificativaInvalidaException, ContaInvalidaException
+    public void cancelarConta(String justificativa)
     {
         // Validação dos dados
         ContaCorrente.validarConta(this);
@@ -152,14 +151,14 @@ public class ContaCorrente
         this.contaCancelada = true;
     }
 
-    public ArrayList<Operacao> consultarExtrato(LocalDate dataInicial, LocalDate dataFinal) throws DataInvalidaException
+    public ArrayList<Operacao> consultarExtrato(LocalDate dataInicial, LocalDate dataFinal)
     {
         // Verificar se a data inicial é posterior a final e exibir erro
         if (dataInicial == null || dataFinal == null || dataInicial.isAfter(dataFinal))
             throw new DataInvalidaException("A dataInicial e dataFinal nao podem ser nulas e a dataInicial precisa ser anterior a final");
 
         // Consultar extrato entre as datas e exibir mensagem
-        System.out.println("Consultando extratos: ");
+        System.out.println("Consultando extrato: ");
         System.out.println("Nome: " + this.cliente.getNome());
         System.out.println("De: " + dataInicial.toString());
         System.out.println("Ate: " + dataFinal.toString() + "\n");
@@ -167,7 +166,7 @@ public class ContaCorrente
         ArrayList<Operacao> extratoOperacoes = new ArrayList<Operacao>();
 
         for (Operacao x: this.historicoOperacoes)
-            if ((x.data.isAfter(dataInicial) || x.data.isEqual(dataInicial)) && x.data.isBefore(dataFinal))
+            if ((x.getData().isAfter(dataInicial) || x.getData().isEqual(dataInicial)) && x.getData().isBefore(dataFinal))
                 extratoOperacoes.add(x);
         return extratoOperacoes;
     }
