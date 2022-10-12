@@ -1,36 +1,37 @@
-import com.mjvgrupo03.controlefinanceiro.ContaCorrente;
-import com.mjvgrupo03.controlefinanceiro.Extrato;
-import com.mjvgrupo03.controlefinanceiro.exception.ContaInvalidaException;
-import com.mjvgrupo03.controlefinanceiro.exception.DataInvalidaException;
-import com.mjvgrupo03.controlefinanceiro.exception.JustificativaInvalidaException;
-import com.mjvgrupo03.controlefinanceiro.exception.SaldoInvalidoException;
+package conta;
+
+import cliente.Cliente;
+import conta.ContaCorrente;
+import conta.exception.ContaInvalidaException;
+import conta.exception.DataInvalidaException;
+import conta.exception.JustificativaInvalidaException;
+import conta.exception.SaldoInvalidoException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Assertions;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
-public class TestandoContaCorrente
+public class ContaCorrenteTestes
 {
     ContaCorrente contaTeste;
     ContaCorrente contaSecundaria;
     ContaCorrente contaNula;
+    Cliente clienteTeste;
 
     @BeforeEach
     public void setUp()
     {
-        contaTeste = new ContaCorrente("Teste", 123, 456);
-        contaSecundaria = new ContaCorrente("Teste 2", 321, 654);
-        contaNula = null;
+        this.clienteTeste = new Cliente("Teste", LocalDate.now(), "123456789");
+        this.contaTeste = new ContaCorrente(this.clienteTeste, 123, 456);
+        this.contaSecundaria = new ContaCorrente(this.clienteTeste, 321, 654);
+        this.contaNula = null;
     }
 
     @DisplayName("Testando o metodo saque")
     @Test
-    public void testandoMetodoSaque() throws SaldoInvalidoException
+    public void testandoMetodoSaque() throws SaldoInvalidoException, ContaInvalidaException
     {
         contaTeste.depositar(500.0);
         contaTeste.sacar(375.0);
@@ -49,7 +50,7 @@ public class TestandoContaCorrente
 
     @DisplayName("Testando o metodo deposito")
     @Test
-    public void testandoMetodoDeposito() throws SaldoInvalidoException
+    public void testandoMetodoDeposito() throws SaldoInvalidoException, ContaInvalidaException
     {
         contaTeste.depositar(100.0);
 
@@ -96,8 +97,11 @@ public class TestandoContaCorrente
 
     @DisplayName("Testando o metodo cancelarConta")
     @Test
-    public void testandoMetodoCancelarConta() throws JustificativaInvalidaException
+    public void testandoMetodoCancelarConta() throws JustificativaInvalidaException, ContaInvalidaException
     {
+        // Validar que não é possível cancelar uma conta sem uma justificativa
+        Assertions.assertThrows(JustificativaInvalidaException.class, () -> contaTeste.cancelarConta(""));
+
         contaTeste.cancelarConta("To sem dinheiro para guardar");
 
         // Validar que uma conta tem o atributo cancelada atualizado
@@ -105,13 +109,11 @@ public class TestandoContaCorrente
         Boolean resultado = contaTeste.getContaCancelada();
         Assertions.assertEquals(expectativa, resultado);
 
-        // Validar que não é possível cancelar uma conta sem uma justificativa
-        Assertions.assertThrows(JustificativaInvalidaException.class, () -> contaTeste.cancelarConta(""));
     }
 
     @DisplayName("Testando o metodo consultarExtrato")
     @Test
-    public void testandoMetodoConsultarExtrato() throws SaldoInvalidoException, DataInvalidaException
+    public void testandoMetodoConsultarExtrato() throws SaldoInvalidoException, DataInvalidaException, ContaInvalidaException
     {
         contaTeste.depositar(1000.0);
         contaTeste.sacar(500.0);
@@ -120,7 +122,7 @@ public class TestandoContaCorrente
 
         // Validar que o extrato está sendo adicionado corretamente
         Integer expectativa = 4;
-        Integer resultado = contaTeste.getListaExtratos().size();
+        Integer resultado = contaTeste.getHistoricoOperacoes().size();
         Assertions.assertEquals(expectativa, resultado);
 
         // Validar que a dataInicial deve ser menor que a dataFinal
