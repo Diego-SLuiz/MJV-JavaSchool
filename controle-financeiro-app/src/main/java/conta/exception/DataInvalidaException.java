@@ -1,4 +1,4 @@
-package com.mjvgrupo03.controlefinanceiro.exception;
+package conta.exception;
 
 public class DataInvalidaException extends Exception
 {
