@@ -1,6 +1,6 @@
 package conta.exception;
 
-public class ContaInvalidaException extends Exception
+public class ContaInvalidaException extends RuntimeException
 {
     public ContaInvalidaException()
     {

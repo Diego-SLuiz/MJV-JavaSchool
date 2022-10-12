@@ -1,6 +1,6 @@
 package conta.exception;
 
-public class SaldoInvalidoException extends Exception
+public class SaldoInvalidoException extends RuntimeException
 {
     public SaldoInvalidoException()
     {
