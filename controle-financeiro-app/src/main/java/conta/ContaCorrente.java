@@ -31,8 +31,6 @@ public class ContaCorrente
 
     public Cliente getCliente() { return this.cliente; }
 
-    public void setCliente(Cliente cliente) { this.cliente = cliente; }
-
     public Double getSaldoDisponivel() { return this.saldoDisponivel; }
 
     public Boolean getContaCancelada() { return this.contaCancelada; }
@@ -41,7 +39,6 @@ public class ContaCorrente
 
     private static void validarConta(ContaCorrente conta)
     {
-        // Validar se uma ContaCorrente não é nula e não está cancelada
         if (conta == null || conta.contaCancelada)
             throw new ContaInvalidaException("Uma ContaCorrente nao nula e nao cancelada e necessaria");
     }
@@ -51,14 +48,12 @@ public class ContaCorrente
         ContaCorrente.validarConta(primeiraConta);
         ContaCorrente.validarConta(segundaConta);
 
-        // Validar se duas contas são diferentes
         if (primeiraConta.numeroConta == segundaConta.numeroConta)
             throw new ContaInvalidaException("As contas precisam ser diferentes");
     }
 
     private static void validarValor(Double valor)
     {
-        // Validar se é um valor não nulo e maior que zero
         if (valor == null || valor <= 0)
             throw new SaldoInvalidoException("Um Double nao nulo e maior que zero e necessario");
     }
@@ -68,14 +63,24 @@ public class ContaCorrente
         ContaCorrente.validarConta(conta);
         ContaCorrente.validarValor(valor);
 
-        // Validar se um valor é superior ao saldo disponível em uma ContaCorrente
         if (valor > conta.saldoDisponivel)
             throw new SaldoInvalidoException("O valor nao pode ser maior que o saldo disponivel");
     }
 
+    private static void validarData(LocalDate dataInicial, LocalDate dataFinal)
+    {
+        if (dataInicial == null || dataFinal == null || dataInicial.isAfter(dataFinal))
+            throw new DataInvalidaException("A dataInicial e dataFinal nao podem ser nulas e a dataInicial precisa ser anterior a final");
+    }
+
+    private static void validarJustificativa(String justificativa)
+    {
+        if (justificativa == null || justificativa.isBlank())
+            throw  new JustificativaInvalidaException("A justificativa precisa ser uma String nao nula e nao vazia");
+    }
+
     private void adicionarHistorico(TipoOperacao tipo, String descricao, Double valor)
     {
-        // Adicionar uma operação realizada ao histórico de operações
         LocalDate data = LocalDate.now();
         Operacao operacao = new Operacao(data, tipo, descricao, valor);
         this.historicoOperacoes.add(operacao);
@@ -139,9 +144,7 @@ public class ContaCorrente
     {
         // Validação dos dados
         ContaCorrente.validarConta(this);
-
-        if (justificativa == null || justificativa.isBlank())
-            throw  new JustificativaInvalidaException("A justificativa precisa ser uma String nao nula e nao vazia");
+        ContaCorrente.validarJustificativa(justificativa);
 
         // Cancelar conta e exibir mensagem
         System.out.println("Conta cancelada com sucesso");
@@ -153,9 +156,8 @@ public class ContaCorrente
 
     public ArrayList<Operacao> consultarExtrato(LocalDate dataInicial, LocalDate dataFinal)
     {
-        // Verificar se a data inicial é posterior a final e exibir erro
-        if (dataInicial == null || dataFinal == null || dataInicial.isAfter(dataFinal))
-            throw new DataInvalidaException("A dataInicial e dataFinal nao podem ser nulas e a dataInicial precisa ser anterior a final");
+        // Validação dos dados
+        ContaCorrente.validarData(dataInicial, dataFinal);
 
         // Consultar extrato entre as datas e exibir mensagem
         System.out.println("Consultando extrato: ");

@@ -1,7 +1,7 @@
 package conta;
 
 import cliente.Cliente;
-import conta.ContaCorrente;
+
 import conta.exception.ContaInvalidaException;
 import conta.exception.DataInvalidaException;
 import conta.exception.JustificativaInvalidaException;
@@ -21,24 +21,20 @@ public class ContaCorrenteTestes
     LocalDate dataTesteFutura;
     Cliente clienteTestePrimario;
     Cliente clienteTesteSecundario;
-    Cliente clienteTesteNulo;
     ContaCorrente contaTestePrimaria;
     ContaCorrente contaTesteSecundaria;
-    ContaCorrente contaTesteNula;
 
     @BeforeEach
     public void setUp()
     {
-        this.dataTestePresente = LocalDate.now();
-        this.dataTesteFutura = this.dataTestePresente.plusMonths(1);
+        dataTestePresente = LocalDate.now();
+        dataTesteFutura = dataTestePresente.plusMonths(1);
 
-        this.clienteTestePrimario = new Cliente("Cliente 1", dataTestePresente, "00123456789");
-        this.clienteTesteSecundario = new Cliente("Cliente 2", dataTestePresente, "00321654987");
-        this.clienteTesteNulo = null;
+        clienteTestePrimario = new Cliente("Cliente 1", dataTestePresente, "00123456789");
+        clienteTesteSecundario = new Cliente("Cliente 2", dataTestePresente, "00321654987");
 
-        this.contaTestePrimaria = new ContaCorrente(this.clienteTestePrimario, 123, 456);
-        this.contaTesteSecundaria = new ContaCorrente(this.clienteTesteSecundario, 321, 456);
-        this.contaTesteNula = null;
+        contaTestePrimaria = new ContaCorrente(clienteTestePrimario, 123, 456);
+        contaTesteSecundaria = new ContaCorrente(clienteTesteSecundario, 321, 456);
     }
 
     @Nested
@@ -46,10 +42,51 @@ public class ContaCorrenteTestes
     public class TestandoMetodoSacar
     {
         @Test
-        @DisplayName("Sacar com um valor igual a zero resulta em erro")
-        public void SacarValorNegativoCausaException()
+        @DisplayName("Sacar com um valor negativo causa uma exception SaldoInvalidoException")
+        public void sacarValorNegativoCausaException()
         {
+            contaTestePrimaria.depositar(100.0);
+            Assertions.assertThrows(SaldoInvalidoException.class, () -> contaTestePrimaria.sacar(-1.0));
+        }
 
+        @Test
+        @DisplayName("Sacar com um valor igual a zero causa uma exception SaldoInvalidoExeption")
+        public void sacarValorZeradoCausaException()
+        {
+            Assertions.assertThrows(SaldoInvalidoException.class, () -> contaTestePrimaria.sacar(0.0));
+        }
+
+        @Test
+        @DisplayName("Sacar com um valor nulo causa uma exception SaldoInvalidoException")
+        public void sacarValorNuloCausaException()
+        {
+            Assertions.assertThrows(SaldoInvalidoException.class, () -> contaTestePrimaria.sacar(null));
+        }
+
+        @Test
+        @DisplayName("Sacar com um valor maior que o saldo disponivel causa uma exception SaldoInvalidoException")
+        public void sacarValorExcessivoCausaException()
+        {
+            Assertions.assertThrows(SaldoInvalidoException.class, () -> contaTestePrimaria.sacar(10000.0));
+        }
+
+        @Test
+        @DisplayName("Sacar valor utilizando uma conta cancelada causa uma exception ContaInvalidaException")
+        public void sacarUtilizandoContaCanceladaCausaException()
+        {
+            contaTestePrimaria.cancelarConta("Teste");
+            Assertions.assertThrows(ContaInvalidaException.class, () -> contaTestePrimaria.sacar(1.0));
+        }
+
+        @Test
+        @DisplayName("Validar que o saldo disponivel esta sendo decrementado corretamente ao sacar")
+        public void sacarValorDecrementaSaldoDisponivel()
+        {
+            contaTestePrimaria.depositar(100.0);
+            contaTestePrimaria.sacar(100.0);
+            Double expectativa = 0.0;
+            Double resultado = contaTestePrimaria.getSaldoDisponivel();
+            Assertions.assertEquals(expectativa, resultado);
         }
     }
 
@@ -57,27 +94,213 @@ public class ContaCorrenteTestes
     @DisplayName("Testando as funcionalidades do metodo depositar")
     public class TestandoMetodoDepositar
     {
+        @Test
+        @DisplayName("Depositar com uma valor negativo causa uma exception SaldoInvalidoException")
+        public void depositarValorNegativoCausaException()
+        {
+            Assertions.assertThrows(SaldoInvalidoException.class, () -> contaTestePrimaria.depositar(-1.0));
+        }
 
+        @Test
+        @DisplayName("Depositar com um valor zerado causa uma exception SaldoInvalidoException")
+        public void depositarValorZeradoCausaException()
+        {
+            Assertions.assertThrows(SaldoInvalidoException.class, () -> contaTestePrimaria.depositar(0.0));
+        }
+
+        @Test
+        @DisplayName("Depositar com um valor nulo causa uma exception SaldoInvalidoException")
+        public void depositarValorNuloCausaException()
+        {
+            Assertions.assertThrows(SaldoInvalidoException.class, () -> contaTestePrimaria.depositar(null));
+        }
+
+        @Test
+        @DisplayName("Depositar valor utilizando uma conta cancelada causa uma exception ContaInvalidaException")
+        public void depositarUtilizandoContaCanceladaCausaException()
+        {
+            contaTestePrimaria.cancelarConta("Teste");
+            Assertions.assertThrows(ContaInvalidaException.class, () -> contaTestePrimaria.depositar(1.0));
+        }
+
+        @Test
+        @DisplayName("Validar que o saldo disponivel esta sendo incrementado corretamente ao depositar")
+        public void depositarValorIncrementaSaldoDisponivel()
+        {
+            contaTestePrimaria.depositar(100.0);
+            Double expectativa = 100.0;
+            Double resultado = contaTestePrimaria.getSaldoDisponivel();
+            Assertions.assertEquals(expectativa, resultado);
+        }
     }
 
     @Nested
     @DisplayName("Testando as funcionalidades do metodo transferir")
     public class TestandoMetodoTransferir
     {
+        @Test
+        @DisplayName("Transferir com um valor negativo causa uma exception SaldoInvalidoException")
+        public void transferirValorNegativoCausaException()
+        {
+            Assertions.assertThrows(SaldoInvalidoException.class, () -> contaTestePrimaria.transferir(-1.0, contaTesteSecundaria));
+        }
 
+        @Test
+        @DisplayName("Transferir com um valor zerado causa uma exception SaldoInvalidoException")
+        public void transferirValorZeradoCausaException()
+        {
+            Assertions.assertThrows(SaldoInvalidoException.class, () -> contaTestePrimaria.transferir(0.0, contaTesteSecundaria));
+        }
+
+        @Test
+        @DisplayName("Transferir com um valor nulo causa uma exception SaldoInvalidoException")
+        public void transferirValorNuloCausaException()
+        {
+            Assertions.assertThrows(SaldoInvalidoException.class, () -> contaTestePrimaria.transferir(null, contaTesteSecundaria));
+        }
+
+        @Test
+        @DisplayName("Transferir com uma valor maior que o saldo disponivel causa uma exception SaldoInvalidoException")
+        public void transferirValorExcessivoCausaException()
+        {
+            Assertions.assertThrows(SaldoInvalidoException.class, () -> contaTestePrimaria.transferir(10000.0, contaTesteSecundaria));
+        }
+
+        @Test
+        @DisplayName("Transferir utilizando uma conta cancelada causa uma exception ContaInvalidaException")
+        public void transferirUtilizandoContaCanceladaCausaException()
+        {
+            contaTestePrimaria.cancelarConta("Teste");
+            Assertions.assertThrows(ContaInvalidaException.class, () -> contaTestePrimaria.transferir(1.0, contaTesteSecundaria));
+        }
+
+        @Test
+        @DisplayName("Transferir para uma conta cancelada causa uma exception ContaInvalidaException")
+        public void transferirParaContaCanceladaCausaException()
+        {
+            contaTestePrimaria.depositar(100.0);
+            contaTesteSecundaria.cancelarConta("Teste");
+            Assertions.assertThrows(ContaInvalidaException.class, () -> contaTestePrimaria.transferir(50.0, contaTesteSecundaria));
+        }
+
+        @Test
+        @DisplayName("Transferir para uma conta nula causa uma exception ContaInvalidaException")
+        public void transferirParaContaNulaCausaException()
+        {
+            contaTestePrimaria.depositar(100.0);
+            Assertions.assertThrows(ContaInvalidaException.class, () -> contaTestePrimaria.transferir(50.0, null));
+        }
+
+        @Test
+        @DisplayName("Validar que uma transferencia decrementa o saldo disponivel da conta que transfere")
+        public void transferirDecrementaSaldoDisponivelRemetente()
+        {
+            contaTestePrimaria.depositar(100.0);
+            contaTestePrimaria.transferir(50.0, contaTesteSecundaria);
+            Double expectativa = 50.0;
+            Double resultado = contaTestePrimaria.getSaldoDisponivel();
+            Assertions.assertEquals(expectativa, resultado);
+        }
+
+        @Test
+        @DisplayName("Validar que uma transferencia incrementa o saldo disponivel da conta que recebe")
+        public void transferirIncrementaSaldoDisponivelDestinatario()
+        {
+            contaTestePrimaria.depositar(100.0);
+            contaTestePrimaria.transferir(75.0, contaTesteSecundaria);
+            Double expectativa = 75.0;
+            Double resultado = contaTesteSecundaria.getSaldoDisponivel();
+            Assertions.assertEquals(expectativa, resultado);
+        }
+
+        @Test
+        @DisplayName("Transferir para a mesma conta causa uma exception ContaInvalidaException")
+        public void transferirParaMesmaContaCausaException()
+        {
+            contaTestePrimaria.depositar(100.0);
+            Assertions.assertThrows(ContaInvalidaException.class, () -> contaTestePrimaria.transferir(100.0, contaTestePrimaria));
+        }
     }
 
     @Nested
     @DisplayName("Testando as funcionalidades do metodo cancelarConta")
     public class TestandoMetodoCancelarConta
     {
+        @Test
+        @DisplayName("Cancelar conta com uma justificativa vazia causa uma exception JustificativaInvalidaException")
+        public void cancelarContaJustificativaVaziaCausaException()
+        {
+            Assertions.assertThrows(JustificativaInvalidaException.class, () -> contaTestePrimaria.cancelarConta(" "));
+        }
 
+        @Test
+        @DisplayName("Cancelar conta com uma justificativa nula causa uma exception JustificativaInvalidaException")
+        public void cancelarContaJustificativaNulaCausaException()
+        {
+            Assertions.assertThrows(JustificativaInvalidaException.class, () -> contaTestePrimaria.cancelarConta(null));
+        }
+
+        @Test
+        @DisplayName("Cancelar conta que ja esta cancelada causa exception ContaInvalidaException")
+        public void cancelarContaCanceladaCausaExeption()
+        {
+            contaTestePrimaria.cancelarConta("Teste");
+            Assertions.assertThrows(ContaInvalidaException.class, () -> contaTestePrimaria.cancelarConta("Teste"));
+        }
+
+        @Test
+        @DisplayName("Validar que o atributo cancelada e atualizado corretamente ao cancelar uma conta")
+        public void cancelarContaAtualizaAtributoCancelada()
+        {
+            contaTestePrimaria.cancelarConta("Teste");
+            Assertions.assertTrue(contaTestePrimaria.getContaCancelada());
+        }
     }
 
     @Nested
     @DisplayName("Testando as funcionalidades do metodo consultarExtrato")
     public class TestandoMetodoConsultarExtrato
     {
+        @Test
+        @DisplayName("Consultar extrato de uma conta cancelada causa uma exception ContaInvalidaException")
+        public void consultarExtratoContaCanceladaCausaException()
+        {
+            contaTestePrimaria.cancelarConta("Teste");
+            contaTestePrimaria.consultarExtrato(dataTestePresente, dataTesteFutura);
+        }
 
+        @Test
+        @DisplayName("Consultar extrato com uma data inicial nula causa uma exception DataInvalidaException")
+        public void consultarExtratoDataInicialNulaCausaException()
+        {
+            Assertions.assertThrows(DataInvalidaException.class, () -> contaTestePrimaria.consultarExtrato(null, dataTesteFutura));
+        }
+
+        @Test
+        @DisplayName("Consultar extrato com uma data final nula causa uma exception DataInvalidaException")
+        public void consultarExtratoDataFinalNulaCausaException()
+        {
+            Assertions.assertThrows(DataInvalidaException.class, () -> contaTestePrimaria.consultarExtrato(dataTestePresente, null));
+        }
+
+        @Test
+        @DisplayName("Consultar extrato com uma data inicial posterior a final causa uma exception DataInvalidaException")
+        public void consultarExtratoDataInicialPosteriorFinalCausaException()
+        {
+            Assertions.assertThrows(DataInvalidaException.class, () -> contaTestePrimaria.consultarExtrato(dataTesteFutura, dataTestePresente));
+        }
+
+        @Test
+        @DisplayName("Validar que o extrato esta sendo retornado corretamente")
+        public void consultarExtratoRetornaExtratoCorretamente()
+        {
+            contaTestePrimaria.depositar(200.0);
+            contaTestePrimaria.depositar(200.0);
+            contaTestePrimaria.sacar(200.0);
+            contaTestePrimaria.sacar(200.0);
+            Integer expectativa = 4;
+            Integer resultado = contaTestePrimaria.consultarExtrato(dataTestePresente, dataTesteFutura).size();
+            Assertions.assertEquals(expectativa, resultado);
+        }
     }
 }
