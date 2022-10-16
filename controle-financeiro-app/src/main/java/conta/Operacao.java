@@ -1,5 +1,7 @@
 package conta;
 
+import conta.enumeration.TipoOperacao;
+
 import java.time.LocalDate;
 
 public class Operacao

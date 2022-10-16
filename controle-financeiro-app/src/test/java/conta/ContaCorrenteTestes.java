@@ -2,6 +2,7 @@ package conta;
 
 import cliente.Cliente;
 
+import conta.enumeration.MotivoCancelamento;
 import conta.exception.ContaInvalidaException;
 import conta.exception.DataInvalidaException;
 import conta.exception.JustificativaInvalidaException;
@@ -74,7 +75,7 @@ public class ContaCorrenteTestes
         @DisplayName("Sacar valor utilizando uma conta cancelada causa uma exception ContaInvalidaException")
         public void sacarUtilizandoContaCanceladaCausaException()
         {
-            contaTestePrimaria.cancelarConta("Teste");
+            contaTestePrimaria.cancelarConta("Teste", MotivoCancelamento.INSATISFEITO);
             Assertions.assertThrows(ContaInvalidaException.class, () -> contaTestePrimaria.sacar(1.0));
         }
 
@@ -119,7 +120,7 @@ public class ContaCorrenteTestes
         @DisplayName("Depositar valor utilizando uma conta cancelada causa uma exception ContaInvalidaException")
         public void depositarUtilizandoContaCanceladaCausaException()
         {
-            contaTestePrimaria.cancelarConta("Teste");
+            contaTestePrimaria.cancelarConta("Teste", MotivoCancelamento.INSATISFEITO);
             Assertions.assertThrows(ContaInvalidaException.class, () -> contaTestePrimaria.depositar(1.0));
         }
 
@@ -170,7 +171,7 @@ public class ContaCorrenteTestes
         @DisplayName("Transferir utilizando uma conta cancelada causa uma exception ContaInvalidaException")
         public void transferirUtilizandoContaCanceladaCausaException()
         {
-            contaTestePrimaria.cancelarConta("Teste");
+            contaTestePrimaria.cancelarConta("Teste", MotivoCancelamento.INSATISFEITO);
             Assertions.assertThrows(ContaInvalidaException.class, () -> contaTestePrimaria.transferir(1.0, contaTesteSecundaria));
         }
 
@@ -179,7 +180,7 @@ public class ContaCorrenteTestes
         public void transferirParaContaCanceladaCausaException()
         {
             contaTestePrimaria.depositar(100.0);
-            contaTesteSecundaria.cancelarConta("Teste");
+            contaTesteSecundaria.cancelarConta("Teste", MotivoCancelamento.INSATISFEITO);
             Assertions.assertThrows(ContaInvalidaException.class, () -> contaTestePrimaria.transferir(50.0, contaTesteSecundaria));
         }
 
@@ -230,29 +231,29 @@ public class ContaCorrenteTestes
         @DisplayName("Cancelar conta com uma justificativa vazia causa uma exception JustificativaInvalidaException")
         public void cancelarContaJustificativaVaziaCausaException()
         {
-            Assertions.assertThrows(JustificativaInvalidaException.class, () -> contaTestePrimaria.cancelarConta(" "));
+            Assertions.assertThrows(JustificativaInvalidaException.class, () -> contaTestePrimaria.cancelarConta(" ", MotivoCancelamento.INSATISFEITO));
         }
 
         @Test
         @DisplayName("Cancelar conta com uma justificativa nula causa uma exception JustificativaInvalidaException")
         public void cancelarContaJustificativaNulaCausaException()
         {
-            Assertions.assertThrows(JustificativaInvalidaException.class, () -> contaTestePrimaria.cancelarConta(null));
+            Assertions.assertThrows(JustificativaInvalidaException.class, () -> contaTestePrimaria.cancelarConta(null, MotivoCancelamento.INSATISFEITO));
         }
 
         @Test
         @DisplayName("Cancelar conta que ja esta cancelada causa exception ContaInvalidaException")
         public void cancelarContaCanceladaCausaExeption()
         {
-            contaTestePrimaria.cancelarConta("Teste");
-            Assertions.assertThrows(ContaInvalidaException.class, () -> contaTestePrimaria.cancelarConta("Teste"));
+            contaTestePrimaria.cancelarConta("Teste", MotivoCancelamento.INSATISFEITO);
+            Assertions.assertThrows(ContaInvalidaException.class, () -> contaTestePrimaria.cancelarConta("Teste", MotivoCancelamento.INSATISFEITO));
         }
 
         @Test
         @DisplayName("Validar que o atributo cancelada e atualizado corretamente ao cancelar uma conta")
         public void cancelarContaAtualizaAtributoCancelada()
         {
-            contaTestePrimaria.cancelarConta("Teste");
+            contaTestePrimaria.cancelarConta("Teste", MotivoCancelamento.INSATISFEITO);
             Assertions.assertTrue(contaTestePrimaria.getContaCancelada());
         }
     }
@@ -265,8 +266,8 @@ public class ContaCorrenteTestes
         @DisplayName("Consultar extrato de uma conta cancelada causa uma exception ContaInvalidaException")
         public void consultarExtratoContaCanceladaCausaException()
         {
-            contaTestePrimaria.cancelarConta("Teste");
-            contaTestePrimaria.consultarExtrato(dataTestePresente, dataTesteFutura);
+            contaTestePrimaria.cancelarConta("Teste", MotivoCancelamento.INSATISFEITO);
+            Assertions.assertThrows(ContaInvalidaException.class, () -> contaTestePrimaria.consultarExtrato(dataTestePresente, dataTesteFutura));
         }
 
         @Test
